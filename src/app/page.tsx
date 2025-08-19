@@ -4,20 +4,31 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
-import { Camera } from 'lucide-react';
+import { Camera, Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const { user, login } = useAuth();
+  const { user, login, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (user) {
+    // We only want to redirect if loading is false and user is authenticated.
+    if (!loading && user) {
       router.push('/photos');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
+  // While firebase is checking auth state, show a loader
+  if (loading) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background text-center p-4">
+            <Loader2 className="h-24 w-24 animate-spin text-primary" />
+        </div>
+    );
+  }
+
+  // If the user is logged in, useEffect will redirect, so we can return null.
   if (user) {
-    return null; // or a loading spinner
+    return null;
   }
 
   return (
