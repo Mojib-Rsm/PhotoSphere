@@ -27,10 +27,12 @@ export default function Home() {
   }
 
   // If the user is logged in, useEffect will redirect, so we can return null.
+  // This prevents the login UI from flashing briefly for logged-in users.
   if (user) {
     return null;
   }
 
+  // If we are not loading and there is no user, show the login page.
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-center p-4">
       <div className="mb-8">
