@@ -28,17 +28,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         onAuthStateChanged,
         GoogleAuthProvider,
         browserPopupRedirectResolver, // Using redirect which is more robust
-        initializeAuth,
+        getRedirectResult,
       } = await import("firebase/auth");
 
-      // Use getAuth instead of initializing multiple times
       const authInstance = getAuth(app);
-      
       const googleProvider = new GoogleAuthProvider();
       googleProvider.addScope('https://www.googleapis.com/auth/photoslibrary.readonly');
       
       setAuth(authInstance);
       setProvider(googleProvider);
+
+      // Check for redirect result
+      try {
+        await getRedirectResult(authInstance);
+      } catch(error) {
+        console.error("Error getting redirect result", error);
+      }
 
       const unsubscribe = onAuthStateChanged(authInstance, (user) => {
         setUser(user);
