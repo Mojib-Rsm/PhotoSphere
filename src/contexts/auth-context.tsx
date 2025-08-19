@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { createContext, useContext, useState, useMemo, useEffect } from "react";
-import { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider, type User, initializeAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider, type User, initializeAuth, browserLocalPersistence } from "firebase/auth";
 import { app } from "@/lib/firebase";
 
 interface AuthContextType {
@@ -13,7 +13,13 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const auth = getAuth(app);
+
+// Initialize auth once, outside of the component render cycle.
+const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence,
+  authDomain: "photosphere-7fjv5.firebaseapp.com",
+});
+
 const provider = new GoogleAuthProvider();
 
 // Request permissions to read the user's photo library.
@@ -33,11 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async () => {
     try {
-      // Explicitly setting authDomain can help in some environments
-      const authWithDomain = initializeAuth(app, {
-        authDomain: "photosphere-7fjv5.firebaseapp.com",
-      });
-      await signInWithPopup(authWithDomain, provider);
+      await signInWithPopup(auth, provider);
     } catch (error) {
       console.error("Error signing in with Google", error);
     }
