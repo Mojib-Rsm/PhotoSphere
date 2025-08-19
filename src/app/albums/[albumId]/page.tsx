@@ -1,3 +1,5 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import { withAuth } from "@/components/auth/with-auth";
 import { PhotoGrid } from "@/components/photos/photo-grid";
@@ -31,7 +33,13 @@ function AlbumDetailPage({ params }: { params: { albumId: string } }) {
   );
 }
 
-export default withAuth(AlbumDetailPage);
+const AuthAlbumDetailPage = withAuth(AlbumDetailPage);
+
+function AlbumDetailStaticPage({ params }: { params: { albumId: string } }) {
+  return <AuthAlbumDetailPage params={params} />;
+}
+
+export default AlbumDetailStaticPage;
 
 export async function generateStaticParams() {
   return mockAlbums.map((album) => ({

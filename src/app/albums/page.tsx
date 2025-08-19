@@ -1,3 +1,5 @@
+"use client";
+
 import { withAuth } from "@/components/auth/with-auth";
 import { AlbumList } from "@/components/albums/album-list";
 import { mockAlbums, mockPhotos } from "@/lib/data";

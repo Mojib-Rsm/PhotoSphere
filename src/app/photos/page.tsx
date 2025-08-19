@@ -1,3 +1,5 @@
+"use client";
+
 import { withAuth } from "@/components/auth/with-auth";
 import { PhotoGrid } from "@/components/photos/photo-grid";
 import { mockPhotos } from "@/lib/data";
