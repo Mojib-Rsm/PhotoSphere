@@ -15,10 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Initialize auth once, outside of the component render cycle.
-const auth = initializeAuth(app, {
-  persistence: browserLocalPersistence,
-  authDomain: "photosphere-7fjv5.firebaseapp.com",
-});
+const auth = getAuth(app);
 
 const provider = new GoogleAuthProvider();
 
