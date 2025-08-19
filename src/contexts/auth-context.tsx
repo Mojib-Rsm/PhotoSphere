@@ -27,15 +27,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         getAuth,
         onAuthStateChanged,
         GoogleAuthProvider,
-        browserPopupRedirectResolver,
+        browserPopupRedirectResolver, // Using redirect which is more robust
         initializeAuth,
       } = await import("firebase/auth");
 
-      const authInstance = initializeAuth(app, {
-        persistence: undefined,
-        popupRedirectResolver: browserPopupRedirectResolver,
-      });
-
+      // Use getAuth instead of initializing multiple times
+      const authInstance = getAuth(app);
+      
       const googleProvider = new GoogleAuthProvider();
       googleProvider.addScope('https://www.googleapis.com/auth/photoslibrary.readonly');
       
@@ -59,9 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Auth has not been initialized yet.");
         return;
     }
-    const { signInWithPopup } = await import("firebase/auth");
+    const { signInWithRedirect } = await import("firebase/auth");
     try {
-      await signInWithPopup(auth, provider);
+      // Use signInWithRedirect which is more reliable in some environments
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Error signing in with Google", error);
     }
