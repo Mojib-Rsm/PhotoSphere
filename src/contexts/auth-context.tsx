@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { createContext, useContext, useState, useMemo, useEffect } from "react";
-import { getAuth, onAuthStateChanged, signInWithRedirect, signOut, GoogleAuthProvider, type User } from "firebase/auth";
+import type { Auth, User, GoogleAuthProvider } from "firebase/auth";
 import { app } from "@/lib/firebase";
 
 interface AuthContextType {
@@ -14,39 +14,73 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-provider.addScope('https://www.googleapis.com/auth/photoslibrary.readonly');
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [auth, setAuth] = useState<Auth | null>(null);
+  const [provider, setProvider] = useState<GoogleAuthProvider | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    // Dynamically import Firebase Auth on the client side
+    const initAuth = async () => {
+      const {
+        getAuth,
+        onAuthStateChanged,
+        GoogleAuthProvider,
+        browserPopupRedirectResolver,
+        initializeAuth,
+      } = await import("firebase/auth");
+
+      const authInstance = initializeAuth(app, {
+        persistence: undefined,
+        popupRedirectResolver: browserPopupRedirectResolver,
+      });
+
+      const googleProvider = new GoogleAuthProvider();
+      googleProvider.addScope('https://www.googleapis.com/auth/photoslibrary.readonly');
+      
+      setAuth(authInstance);
+      setProvider(googleProvider);
+
+      const unsubscribe = onAuthStateChanged(authInstance, (user) => {
+        setUser(user);
+        setLoading(false);
+      });
+
+      // Cleanup subscription on unmount
+      return () => unsubscribe();
+    };
+
+    initAuth();
   }, []);
 
   const login = async () => {
+    if (!auth || !provider) {
+        console.error("Auth has not been initialized yet.");
+        return;
+    }
+    const { signInWithPopup } = await import("firebase/auth");
     try {
-      await signInWithRedirect(auth, provider);
+      await signInWithPopup(auth, provider);
     } catch (error) {
       console.error("Error signing in with Google", error);
     }
   };
 
   const logout = async () => {
+    if (!auth) {
+        console.error("Auth has not been initialized yet.");
+        return;
+    }
+    const { signOut } = await import("firebase/auth");
     try {
       await signOut(auth);
     } catch (error) {
       console.error("Error signing out", error);
     }
   };
-
-  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading]);
+  
+  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, auth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
