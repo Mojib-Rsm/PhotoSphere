@@ -7,16 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Camera } from 'lucide-react';
 
 export default function Home() {
-  const { isLoggedIn, login } = useAuth();
+  const { user, login } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (user) {
       router.push('/photos');
     }
-  }, [isLoggedIn, router]);
+  }, [user, router]);
 
-  if (isLoggedIn) {
+  if (user) {
     return null; // or a loading spinner
   }
 

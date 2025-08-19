@@ -3,14 +3,11 @@
 import { withAuth } from "@/components/auth/with-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Image as ImageIcon } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import { Image as ImageIcon, LogOut } from "lucide-react";
 
 function SettingsPage() {
-
-  const handleConnect = () => {
-    // Placeholder for Google Photos connection logic
-    alert("Connecting to Google Photos...");
-  };
+  const { user, login, logout } = useAuth();
 
   return (
     <main className="flex-1 p-4 md:p-6">
@@ -21,18 +18,35 @@ function SettingsPage() {
         <CardHeader>
           <CardTitle>Google Photos Integration</CardTitle>
           <CardDescription>
-            Connect your Google Photos account to import and manage your photos directly within PhotoSphere.
+            {user
+              ? "You are connected to Google Photos."
+              : "Connect your Google Photos account to import and manage your photos directly within PhotoSphere."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={handleConnect}>
-            <ImageIcon className="mr-2 h-4 w-4" />
-            Connect to Google Photos
-          </Button>
+          {user ? (
+            <div className="flex items-center gap-4">
+                <p>Connected as {user.displayName} ({user.email})</p>
+                <Button variant="outline" onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Disconnect
+                </Button>
+            </div>
+          ) : (
+            <Button onClick={login}>
+              <ImageIcon className="mr-2 h-4 w-4" />
+              Connect to Google Photos
+            </Button>
+          )}
         </CardContent>
       </Card>
     </main>
   );
 }
 
-export default withAuth(SettingsPage);
+function AuthSettingsPage(props: any) {
+    const Component = withAuth(SettingsPage);
+    return <Component {...props} />
+}
+
+export default AuthSettingsPage;

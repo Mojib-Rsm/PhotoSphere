@@ -39,9 +39,9 @@ import { Input } from "./ui/input";
 
 function AppSidebar() {
   const pathname = usePathname();
-  const { isLoggedIn } = useAuth();
+  const { user } = useAuth();
 
-  if (!isLoggedIn) {
+  if (!user) {
     return null;
   }
 
@@ -118,7 +118,7 @@ function AppSidebar() {
 }
 
 function AppHeader() {
-  const { isLoggedIn, login, logout } = useAuth();
+  const { user, login, logout } = useAuth();
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
@@ -135,13 +135,13 @@ function AppHeader() {
           </div>
         </form>
       </div>
-      {isLoggedIn ? (
+      {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon" className="rounded-full">
               <Avatar>
-                <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" data-ai-hint="woman portrait"/>
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarImage src={user.photoURL ?? ""} data-ai-hint="woman portrait"/>
+                <AvatarFallback>{user.displayName?.charAt(0) ?? 'U'}</AvatarFallback>
               </Avatar>
               <span className="sr-only">Toggle user menu</span>
             </Button>
@@ -149,7 +149,9 @@ function AppHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <Link href="/settings">
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
@@ -162,14 +164,14 @@ function AppHeader() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { isLoggedIn } = useAuth();
+  const { user } = useAuth();
 
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex flex-1 flex-col">
-          {isLoggedIn && <AppHeader />}
+          {user && <AppHeader />}
           <SidebarInset>{children}</SidebarInset>
         </div>
       </div>

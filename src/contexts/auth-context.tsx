@@ -1,23 +1,53 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { createContext, useContext, useState, useMemo } from "react";
+import { createContext, useContext, useState, useMemo, useEffect } from "react";
+import { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider, type User } from "firebase/auth";
+import { app } from "@/lib/firebase";
 
 interface AuthContextType {
-  isLoggedIn: boolean;
+  user: User | null;
+  loading: boolean;
   login: () => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// Request permissions to read the user's photo library.
+provider.addScope('https://www.googleapis.com/auth/photoslibrary.readonly');
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = () => setIsLoggedIn(true);
-  const logout = () => setIsLoggedIn(false);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const value = useMemo(() => ({ isLoggedIn, login, logout }), [isLoggedIn]);
+  const login = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Error signing in with Google", error);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out", error);
+    }
+  };
+
+  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
