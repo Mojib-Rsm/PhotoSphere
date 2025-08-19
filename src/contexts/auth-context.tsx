@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { createContext, useContext, useState, useMemo, useEffect } from "react";
-import { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider, type User, initializeAuth, browserLocalPersistence } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithRedirect, signOut, GoogleAuthProvider, type User } from "firebase/auth";
 import { app } from "@/lib/firebase";
 
 interface AuthContextType {
@@ -14,12 +14,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Initialize auth once, outside of the component render cycle.
 const auth = getAuth(app);
-
 const provider = new GoogleAuthProvider();
-
-// Request permissions to read the user's photo library.
 provider.addScope('https://www.googleapis.com/auth/photoslibrary.readonly');
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -36,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async () => {
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Error signing in with Google", error);
     }
