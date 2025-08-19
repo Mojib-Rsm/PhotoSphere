@@ -7,7 +7,7 @@ import { mockAlbums, mockPhotos } from "@/lib/data";
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 
-function AlbumDetailPage({ params }: { params: { albumId: string } }) {
+function AlbumDetailPageContent({ params }: { params: { albumId: string } }) {
   const album = mockAlbums.find((a) => a.id === params.albumId);
 
   if (!album) {
@@ -33,16 +33,8 @@ function AlbumDetailPage({ params }: { params: { albumId: string } }) {
   );
 }
 
-const AuthAlbumDetailPage = withAuth(AlbumDetailPage);
+const AuthAlbumDetailPage = withAuth(AlbumDetailPageContent);
 
-function AlbumDetailStaticPage({ params }: { params: { albumId: string } }) {
+export default function AlbumDetailPage({ params }: { params: { albumId: string } }) {
   return <AuthAlbumDetailPage params={params} />;
-}
-
-export default AlbumDetailStaticPage;
-
-export async function generateStaticParams() {
-  return mockAlbums.map((album) => ({
-    albumId: album.id,
-  }));
 }
