@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { createContext, useContext, useState, useMemo, useEffect } from "react";
-import { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider, type User } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider, type User, initializeAuth } from "firebase/auth";
 import { app } from "@/lib/firebase";
 
 interface AuthContextType {
@@ -33,7 +33,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async () => {
     try {
-      await signInWithPopup(auth, provider);
+      // Explicitly setting authDomain can help in some environments
+      const authWithDomain = initializeAuth(app, {
+        authDomain: "photosphere-7fjv5.firebaseapp.com",
+      });
+      await signInWithPopup(authWithDomain, provider);
     } catch (error) {
       console.error("Error signing in with Google", error);
     }
